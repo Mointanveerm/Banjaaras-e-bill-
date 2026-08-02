@@ -1,34 +1,45 @@
 [app]
-title = BanjaarasCatering
-package.name = banjaarascatering
+
+# Title of your application
+title = Banjaaras Catering
+
+# Package name
+package.name = banjaaras
+
+# Package domain (needed for android packaging)
 package.domain = org.banjaaras
 
+# Source files to include (let it point to the root directory)
 source.dir = .
+
+# Source files to include (let it find python code and images/kv files)
 source.include_exts = py,png,jpg,kv,atlas
-version = 1.0
 
-# Dependencies required for modern UI and saving images
-requirements = python3,kivy==2.3.0,kivymd,pillow
+# Application versioning
+version = 0.1
 
-# Orientation and Fullscreen
+# List of prerequisites (unpinned to prevent download gateway timeouts)
+requirements = python3,kivy,kivymd,pillow
+
+# Supported orientations
 orientation = portrait
-fullscreen = 0
 
-# Android specific configurations
-# Targeting API 34 (Android 14) which is the current stable maximum for buildozer. 
-# Android 16 (API 36) compatibility is handled smoothly by this backward compatibility.
-android.api = 34
+# List the Android permissions your app needs
+android.permissions = INTERNET
+
+# Automatically accept Android SDK licenses to prevent build freezes
+android.accept_sdk_license = True
+
+# Android API level to target
+android.api = 33
+
+# Minimum API level
 android.minapi = 21
 
-# Permissions needed to download/save the bill to device storage
-android.permissions = READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
-
-# CPU architecture for modern Android devices (including Vivo Y-series)
-android.archs = arm64-v8a, armeabi-v7a
-
-# P4A specific
-p4a.branch = master
-
 [buildozer]
+
+# Log level (0 = error only, 1 = info, 2 = debug)
 log_level = 2
+
+# Warn on root building (needed for GitHub Actions)
 warn_on_root = 1
