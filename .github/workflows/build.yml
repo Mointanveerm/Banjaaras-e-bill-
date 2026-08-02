@@ -29,12 +29,10 @@ jobs:
         pip install --upgrade pip
         pip install --upgrade buildozer cython virtualenv
 
-    - name: Pre-accept Android SDK Licenses
+    - name: Accept Android SDK Licenses
       run: |
-        mkdir -p /usr/local/lib/android/sdk/licenses
-        echo "24333f8a63b6825ea3c5514f83c2829b004d1fee" > /usr/local/lib/android/sdk/licenses/android-sdk-license
-        echo "d56f5187479451eabf01fb78af6dfcb131a648cd" > /usr/local/lib/android/sdk/licenses/android-sdk-preview-license
-        echo "84831b9409646a918e30573bab4c9c91346d8abd" > /usr/local/lib/android/sdk/licenses/intel-android-extra-license
+        export PATH=$PATH:/usr/local/lib/android/sdk/cmdline-tools/latest/bin:/usr/local/lib/android/sdk/tools/bin
+        yes | sdkmanager --licenses || true
 
     - name: Cache Buildozer global directory
       uses: actions/cache@v4
