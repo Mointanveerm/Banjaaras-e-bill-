@@ -88,11 +88,23 @@ jobs:
           restore-keys: |
             buildozer-project-${{ runner.os }}-
 
-      - name: Build APK with Buildozer
+      - name: Build APK with Buildozer (with retry for transient network errors)
         working-directory: ./app
         run: |
           set -o pipefail
-          (yes 2>/dev/null || true) | buildozer -v android debug 2>&1 | tee buildozer_build.log
+          attempt=1
+          max_attempts=3
+          until (yes 2>/dev/null || true) | buildozer -v android debug 2>&1 | tee -a buildozer_build.log; do
+            exit_code=$?
+            echo "### Attempt $attempt failed (exit $exit_code). ###" | tee -a buildozer_build.log
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "### All $max_attempts attempts failed. Giving up. ###" | tee -a buildozer_build.log
+              exit "$exit_code"
+            fi
+            attempt=$((attempt + 1))
+            echo "### Retrying in 20s (attempt $attempt/$max_attempts)... ###" | tee -a buildozer_build.log
+            sleep 20
+          done
 
       - name: Upload full build log (always, for debugging)
         if: always()
