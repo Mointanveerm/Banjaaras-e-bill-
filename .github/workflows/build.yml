@@ -30,6 +30,7 @@ jobs:
         pip install --upgrade buildozer cython virtualenv
 
     - name: Build with Buildozer
+      working-directory: ./app
       run: |
         buildozer android debug
 
@@ -37,4 +38,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Banjaaras-Catering-APK
-        path: bin/*.apk
+        path: app/bin/*.apk
