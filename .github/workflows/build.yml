@@ -29,10 +29,18 @@ jobs:
         pip install --upgrade pip
         pip install --upgrade buildozer cython virtualenv
 
+    - name: Cache Buildozer global directory
+      uses: actions/cache@v4
+      with:
+        path: ~/.buildozer
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('app/buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-buildozer-
+
     - name: Build with Buildozer
       working-directory: ./app
       run: |
-        buildozer android debug
+        yes | buildozer android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
