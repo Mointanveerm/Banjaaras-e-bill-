@@ -180,7 +180,10 @@ android.enable_androidx = True
 #android.copy_libs = 1
 
 # (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
-android.archs = arm64-v8a, armeabi-v7a
+# Building a single arch first reduces total download/compile volume and
+# retry surface while diagnosing intermittent network failures. Add
+# 'armeabi-v7a' back once a build succeeds reliably.
+android.archs = arm64-v8a
 
 # (int) overrides automatic versionCode computation (used in build.gradle)
 # this is not the same as app version and it has to be an integer
@@ -206,7 +209,9 @@ android.allow_backup = True
 p4a.bootstrap = sdl2
 
 # (str) python-for-android branch to use, defaults to master
-#p4a.branch = master
+# Pinned to a stable tagged release instead of master for reproducibility
+# and to avoid picking up in-flight changes on the moving master branch.
+p4a.branch = v2024.01.21
 
 [buildozer]
 
