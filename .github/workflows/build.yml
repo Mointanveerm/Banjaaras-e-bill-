@@ -76,9 +76,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
-          key: buildozer-global-${{ hashFiles('app/buildozer.spec') }}
+          key: buildozer-global-v2-${{ hashFiles('app/buildozer.spec') }}
           restore-keys: |
-            buildozer-global-
+            buildozer-global-v2-
 
       - name: Cache Buildozer project build directory
         uses: actions/cache@v4
@@ -88,19 +88,11 @@ jobs:
           restore-keys: |
             buildozer-project-${{ runner.os }}-
 
-      - name: Pre-accept Android SDK licenses
-        run: |
-          ANDROID_SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
-          mkdir -p "$ANDROID_SDK_ROOT/licenses"
-          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > "$ANDROID_SDK_ROOT/licenses/android-sdk-license"
-          echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> "$ANDROID_SDK_ROOT/licenses/android-sdk-license"
-          echo "84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_SDK_ROOT/licenses/android-sdk-preview-license"
-
       - name: Build APK with Buildozer
         working-directory: ./app
         run: |
           set -o pipefail
-          buildozer -v android debug 2>&1 | tee buildozer_build.log
+          (yes 2>/dev/null || true) | buildozer -v android debug 2>&1 | tee buildozer_build.log
 
       - name: Upload full build log (always, for debugging)
         if: always()
@@ -121,4 +113,3 @@ jobs:
           path: app/bin/*.apk
           if-no-files-found: error
           retention-days: 30
-          
