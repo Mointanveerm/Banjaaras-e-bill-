@@ -1,45 +1,48 @@
-[app]
+name: Build Banjaaras Android APK
 
-# Title of your application
-title = Banjaaras Catering
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
 
-# Package name
-package.name = banjaaras
+jobs:
+  build:
+    runs-on: ubuntu-22.04
 
-# Package domain (needed for android packaging)
-package.domain = org.banjaaras
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-# Source files to include (let it point to the root directory)
-source.dir = .
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
 
-# Source files to include (let it find python code and images/kv files)
-source.include_exts = py,png,jpg,kv,atlas
+    - name: Install System Dependencies
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo apt-get update
+        sudo apt-get install -y \
+          git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config \
+          zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev \
+          libssl-dev build-essential ccache libltdl-dev \
+          libc6:i386 libstdc++6:i386 zlib1g:i386
 
-# Application versioning
-version = 0.1
+    - name: Cache Buildozer global directory
+      uses: actions/cache@v4
+      with:
+        path: ~/.buildozer
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('app/buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-buildozer-
 
-# List of prerequisites (unpinned to prevent download gateway timeouts)
-requirements = python3,kivy,kivymd,pillow
+    - name: Build with Buildozer
+      working-directory: ./app
+      run: |
+        buildozer android debug
 
-# Supported orientations
-orientation = portrait
-
-# List the Android permissions your app needs
-android.permissions = INTERNET
-
-# Automatically accept Android SDK licenses to prevent build freezes
-android.accept_sdk_license = True
-
-# Android API level to target
-android.api = 33
-
-# Minimum API level
-android.minapi = 21
-
-[buildozer]
-
-# Log level (0 = error only, 1 = info, 2 = debug)
-log_level = 2
-
-# Warn on root building (needed for GitHub Actions)
-warn_on_root = 1
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Banjaaras-Catering-APK
+        path: app/bin/*.apk
