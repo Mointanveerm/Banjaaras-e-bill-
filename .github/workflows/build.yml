@@ -106,6 +106,45 @@ jobs:
             sleep 20
           done
 
+      - name: Print the real error from build log (only runs if build failed)
+        if: failure()
+        working-directory: ./app
+        run: |
+          if [ ! -f buildozer_build.log ]; then
+            echo "(log file not found)"
+            exit 0
+          fi
+
+          echo "===== FULL LOG WITH ENVIRONMENT DUMPS STRIPPED OUT ====="
+          echo "(this removes the ~100-line env var block buildozer prints"
+          echo " on every failure, so the real error is actually visible)"
+          awk '
+            BEGIN { in_env_dump = 0 }
+            {
+              if ($0 ~ /^# ENVIRONMENT:/) {
+                in_env_dump = 1
+                print "--- ENVIRONMENT DUMP OMITTED ---"
+                next
+              }
+              if (in_env_dump == 1) {
+                if ($0 ~ /^#     [A-Za-z0-9_]+ = /) {
+                  next
+                } else {
+                  in_env_dump = 0
+                }
+              }
+              print
+            }
+          ' buildozer_build.log
+
+          echo ""
+          echo "===== ALL LINES MATCHING KNOWN ERROR PATTERNS ====="
+          grep -n -E -i "error|exception|traceback|failed|fatal|cannot find|not found|no such file|permission denied" buildozer_build.log | grep -v "^[0-9]*:#     " || echo "(no matches)"
+
+          echo ""
+          echo "===== LAST 40 RAW LINES (for reference) ====="
+          tail -n 40 buildozer_build.log
+
       - name: Upload full build log (always, for debugging)
         if: always()
         uses: actions/upload-artifact@v4
@@ -125,3 +164,4 @@ jobs:
           path: app/bin/*.apk
           if-no-files-found: error
           retention-days: 30
+        
